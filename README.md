@@ -254,7 +254,226 @@ Breve descrição (2-3 linhas)
 
 ---
 
-## 📝 Seção 5: Documentação Mínima Obrigatória
+## 📂 Seção 5: Estruturação da Documentação - O que vai onde?
+
+### README Principal - Apenas o Essencial
+
+O `README.md` na raiz do projeto é a **vitrine** do projeto. Deve ser conciso e direcionar para documentos específicos.
+
+#### Estrutura do README Principal
+```markdown
+# Nome do Projeto
+
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+
+## 📋 Sobre
+Descrição breve (2-3 linhas) do que o projeto faz e seu objetivo.
+
+## 🚀 Quick Start
+```bash
+# Clone
+git clone https://github.com/Serra-Rocketry/nome-projeto
+# Configure
+cd nome-projeto
+# Execute
+./run.sh
+```
+
+## 📁 Estrutura do Projeto
+```
+├── docs/           → Documentação detalhada
+├── firmware/       → Código do microcontrolador  
+├── hardware/       → Esquemáticos e PCBs
+├── software/       → Interfaces e análises
+└── test/          → Testes e validação
+```
+
+## 🔧 Pré-requisitos
+- Hardware: ESP32 + MPU6050
+- Software: PlatformIO ou Arduino IDE 2.0+
+- Bibliotecas: Ver [requirements.txt](./requirements.txt)
+
+## 📖 Documentação
+- [Guia de Instalação Detalhado](./docs/INSTALACAO.md)
+- [Esquemático e Montagem](./hardware/README.md)
+- [API e Protocolos](./docs/API.md)
+- [Troubleshooting](./docs/TROUBLESHOOTING.md)
+
+## 🤝 Contribuindo
+Ver [Boas Práticas Serra Rocketry](https://github.com/Serra-Rocketry/best-practices)
+
+## 📊 Status do Projeto
+- [x] Leitura de sensores
+- [x] Transmissão LoRa
+- [ ] Interface web
+- [ ] Análise pós-voo
+
+## ✨ Autores
+- @fulano - Firmware e eletrônica
+- @ciclano - Interface e telemetria
+```
+
+### Documentação Distribuída - Cada coisa em seu lugar
+
+#### `/docs/` - Documentação Técnica Detalhada
+```
+docs/
+├── INSTALACAO.md        # Passo a passo completo de setup
+├── API.md               # Endpoints, protocolos, mensagens
+├── TROUBLESHOOTING.md   # Problemas comuns e soluções
+├── CALIBRACAO.md        # Procedimentos de calibração
+├── TESTES.md            # Plano e resultados de testes
+├── diagrams/            # Diagramas técnicos
+│   ├── fluxograma.png
+│   └── state_machine.svg
+└── meetings/            # Atas de reuniões técnicas
+    └── 2024-11-13.md
+```
+
+#### `/hardware/README.md` - Documentação de Hardware
+```markdown
+# Hardware - [Nome do Projeto]
+
+## Lista de Componentes (BOM)
+| Componente | Quantidade | Referência | Link |
+|------------|------------|------------|------|
+| ESP32 | 1 | U1 | [AliExpress](link) |
+| MPU6050 | 1 | U2 | [Eletrogate](link) |
+
+## Pinagem
+| Pino ESP32 | Conexão | Descrição |
+|------------|---------|-----------|
+| GPIO 21 | MPU SDA | I2C Data |
+| GPIO 22 | MPU SCL | I2C Clock |
+
+## Consumo de Energia
+- Operação: 150mA @ 3.3V
+- Sleep: 10µA @ 3.3V
+- Bateria recomendada: LiPo 1S 1000mAh (6h autonomia)
+
+## Fotos da Montagem
+![Montagem](./images/montagem_completa.jpg)
+
+## Arquivos de Fabricação
+- [Esquemático PDF](./schematic.pdf)
+- [Gerbers para PCB](./gerbers/)
+- [Modelo 3D do case](./3d_models/case.stl)
+```
+
+#### `/firmware/README.md` - Documentação do Código
+```markdown
+# Firmware - [Nome do Projeto]
+
+## Arquitetura
+O firmware segue arquitetura de máquina de estados:
+- IDLE: Aguardando comando
+- ARMED: Pronto para lançamento  
+- FLIGHT: Coletando dados
+- LANDED: Transmitindo dados salvos
+
+## Configuração
+Copie `config.example.h` para `config.h` e ajuste:
+```cpp
+#define LORA_FREQ 915.0  // Frequência em MHz
+#define SAMPLE_RATE 100  // Hz
+```
+
+## Fluxo de Dados
+1. Sensores → DMA Buffer
+2. Filtro Kalman
+3. Pacote de telemetria
+4. Transmissão LoRa (100Hz)
+
+## Comandos Disponíveis
+| Comando | Descrição | Exemplo |
+|---------|-----------|---------|
+| ARM | Arma o sistema | `$ARM,1*` |
+| CAL | Calibra sensores | `$CAL,MAG*` |
+
+Ver [API completa](../docs/API.md)
+```
+
+#### `/test/README.md` - Documentação de Testes
+```markdown
+# Plano de Testes
+
+## Testes Unitários
+- [ ] Leitura I2C
+- [ ] Cálculo CRC
+- [ ] Filtro Kalman
+
+## Testes de Integração  
+- [ ] Sensor + Transmissão
+- [ ] Comando remoto + Ação
+
+## Testes em Campo
+| Data | Teste | Resultado | Log |
+|------|-------|-----------|-----|
+| 2024-11-10 | Alcance LoRa | 2.3km | [log](./logs/test_001.csv) |
+
+## Como Executar
+```bash
+cd test/
+python run_tests.py --all
+```
+```
+
+### Arquivos Especiais na Raiz
+
+#### `CHANGELOG.md`
+```markdown
+# Changelog
+
+## [1.1.0] - 2024-11-13
+### Adicionado
+- Suporte para múltiplos sensores
+### Corrigido
+- Bug no cálculo de altitude
+
+## [1.0.0] - 2024-10-01
+### Inicial
+- Primeira versão funcional
+```
+
+#### `LICENSE`
+```
+MIT License ou GPL v3 (discutir com a equipe)
+```
+
+#### `.gitignore`
+```gitignore
+# Builds
+*.hex
+*.bin
+.pio/
+
+# Configurações pessoais  
+config.h
+credentials.h
+
+# Dados de teste grandes
+*.csv
+*.log
+data/raw/
+
+# IDEs
+.vscode/
+.idea/
+```
+
+### 📏 Regras de Ouro
+
+1. **README principal**: Máximo 100 linhas
+2. **Se passa de 1 tela**: Crie documento separado
+3. **Documentação técnica**: Sempre em `/docs/`
+4. **Configurações exemplo**: `config.example.h` versionado, `config.h` no gitignore
+5. **Imagens**: Comprima antes de commitar (max 500KB)
+6. **Logs e dados**: Nunca no repositório, use [Releases](https://docs.github.com/pt/repositories/releasing-projects-on-github) para datasets
+
+---
+
+## 📝 Seção 6: Documentação Mínima Obrigatória
 
 ### Em Todo Commit
 ```bash
@@ -293,7 +512,7 @@ Para cada PCB/montagem, inclua:
 
 ---
 
-## ⚡ Seção 6: Dicas Rápidas para Produtividade
+## ⚡ Seção 7: Dicas Rápidas para Produtividade
 
 ### Comandos Git Mais Usados
 ```bash
@@ -333,7 +552,7 @@ alias gl='git log --oneline --graph'
 
 ---
 
-## 🎯 Seção 7: Checklist de Contribuição
+## 🎯 Seção 8: Checklist de Contribuição
 
 Antes de fazer um PR, verifique:
 
@@ -347,7 +566,7 @@ Antes de fazer um PR, verifique:
 
 ---
 
-## 🚨 Seção 8: Quando Pedir Ajuda
+## 🚨 Seção 9: Quando Pedir Ajuda
 
 ### Está com problema? 
 1. **Leia a mensagem de erro** (sim, toda ela)
@@ -365,7 +584,7 @@ Antes de fazer um PR, verifique:
 
 ---
 
-## 📚 Recursos para Aprender Mais
+## 📚 Seção 10: Recursos para Aprender Mais
 
 ### Git e GitHub
 - 🎮 [Learn Git Branching](https://learngitbranching.js.org/?locale=pt_BR) - Jogo interativo
@@ -374,6 +593,7 @@ Antes de fazer um PR, verifique:
 
 ### Boas Práticas de Código
 - [Clean Code - Resumo](https://github.com/ryanmcdermott/clean-code-javascript) - Princípios aplicáveis a qualquer linguagem
+- [The Twelve-Factor App](https://12factor.net/pt_br/) - Para projetos maiores
 
 ### Específico para Embedded
 - [PlatformIO](https://platformio.org/) - Alternativa profissional ao Arduino IDE
@@ -390,4 +610,5 @@ Este documento é vivo! Encontrou algo confuso? Tem uma dica melhor?
 
 ---
 
+**Última atualização**: Novembro 2024  
 **Mantido por**: Equipe Serra Rocketry - IPRJ/UERJ
