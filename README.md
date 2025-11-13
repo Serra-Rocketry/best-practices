@@ -261,6 +261,7 @@ Breve descrição (2-3 linhas)
 O `README.md` na raiz do projeto é a **vitrine** do projeto. Deve ser conciso e direcionar para documentos específicos.
 
 #### Estrutura do README Principal
+
 ```markdown
 # Nome do Projeto
 
@@ -271,23 +272,17 @@ O `README.md` na raiz do projeto é a **vitrine** do projeto. Deve ser conciso e
 Descrição breve (2-3 linhas) do que o projeto faz e seu objetivo.
 
 ## 🚀 Quick Start
-```bash
-# Clone
-git clone https://github.com/Serra-Rocketry/nome-projeto
-# Configure
-cd nome-projeto
-# Execute
-./run.sh
-```
+1. Clone o repositório
+2. Configure o hardware conforme esquemático
+3. Carregue o firmware
+4. Execute os testes
 
 ## 📁 Estrutura do Projeto
-```
 ├── docs/           → Documentação detalhada
 ├── firmware/       → Código do microcontrolador  
 ├── hardware/       → Esquemáticos e PCBs
 ├── software/       → Interfaces e análises
 └── test/          → Testes e validação
-```
 
 ## 🔧 Pré-requisitos
 - Hardware: ESP32 + MPU6050
@@ -373,11 +368,9 @@ O firmware segue arquitetura de máquina de estados:
 - LANDED: Transmitindo dados salvos
 
 ## Configuração
-Copie `config.example.h` para `config.h` e ajuste:
-```cpp
-#define LORA_FREQ 915.0  // Frequência em MHz
-#define SAMPLE_RATE 100  // Hz
-```
+Copie config.example.h para config.h e ajuste:
+- LORA_FREQ: Frequência em MHz (915.0)
+- SAMPLE_RATE: Taxa de amostragem em Hz (100)
 
 ## Fluxo de Dados
 1. Sensores → DMA Buffer
@@ -388,8 +381,8 @@ Copie `config.example.h` para `config.h` e ajuste:
 ## Comandos Disponíveis
 | Comando | Descrição | Exemplo |
 |---------|-----------|---------|
-| ARM | Arma o sistema | `$ARM,1*` |
-| CAL | Calibra sensores | `$CAL,MAG*` |
+| ARM | Arma o sistema | $ARM,1* |
+| CAL | Calibra sensores | $CAL,MAG* |
 
 Ver [API completa](../docs/API.md)
 ```
@@ -413,10 +406,8 @@ Ver [API completa](../docs/API.md)
 | 2024-11-10 | Alcance LoRa | 2.3km | [log](./logs/test_001.csv) |
 
 ## Como Executar
-```bash
 cd test/
 python run_tests.py --all
-```
 ```
 
 ### Arquivos Especiais na Raiz
@@ -609,6 +600,4 @@ Este documento é vivo! Encontrou algo confuso? Tem uma dica melhor?
 3. Faça um PR com suas melhorias
 
 ---
-
-**Última atualização**: Novembro 2024  
 **Mantido por**: Equipe Serra Rocketry - IPRJ/UERJ
