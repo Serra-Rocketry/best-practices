@@ -1,111 +1,393 @@
-# Criador de Estrutura de Projetos Arduino (Script Bash)
+# 🚀 Boas Práticas - Serra Rocketry
 
-Este repositório contém um script Bash (`.sh`) projetado para automatizar a criação de uma estrutura de diretórios bem organizada para projetos Arduino. O objetivo é fornecer um ponto de partida limpo e padronizado, facilitando o gerenciamento de arquivos, documentação e colaboração em seus projetos de eletrônica e programação com Arduino.
+> Guia essencial para padronização e colaboração nos repositórios da equipe
 
-## Conteúdo do Repositório
+## 📚 Seção 1: Git não é Backup - É uma Máquina do Tempo Colaborativa
 
-* **`init_arduino.sh`**: O script Bash principal que, quando executado, cria a seguinte estrutura de diretórios e arquivos dentro de um diretório com o nome do seu projeto:
+### O que é Git vs Backup
+- **Backup**: Salva uma cópia do estado atual dos arquivos
+- **Git (Versionamento)**: Salva TODA a história de mudanças, quem fez, quando fez, e por quê
+  - Você pode voltar para qualquer ponto da história
+  - Você pode ver exatamente o que mudou entre versões
+  - Várias pessoas podem trabalhar no mesmo projeto sem se atrapalharem
 
-    ```
-    /home/seu-nome-de-usuário/nome-do-projeto/
-    ├── docs/                     # Documentação (diagramas, imagens, datasheets)
-    ├── firmware/                 # Código principal do Arduino
-    │   ├── firmware.ino
-    ├── hardware/                 # Arquivos e informações do hardware
-    ├── lib/                      # Bibliotecas personalizadas ou adaptadas
-    ├── test/                     # Scripts de teste (verificação, debug, etc.)
-    ├── extras/                   # Scripts auxiliares (ex: leitura serial em Python)
-    ├── .gitignore                # Arquivos e pastas ignorados pelo Git
-    ├── README.md                 # Descrição geral do projeto
-    └── contributing.md           # (Opcional) Como contribuir com o projeto
-    ```
+### Por que isso importa para o Serra Rocketry?
+- **Rastreabilidade**: "Por que mudamos o sensor de pressão no ano passado?" - Git tem a resposta
+- **Segurança**: Se algo quebrar, sabemos exatamente qual mudança causou o problema
+- **Portfólio**: Suas contribuições ficam registradas PARA SEMPRE no seu perfil GitHub
+- **Colaboração**: Todos podem trabalhar simultaneamente sem medo de estragar o trabalho do colega
 
-* **`README.md`**: Este arquivo, fornecendo uma visão geral do script e como utilizá-lo.
+### Conceitos Essenciais (com analogias)
+- **Repositório**: A pasta do projeto com superpoderes de histórico
+- **Commit**: Uma "foto" do projeto em um momento específico, com descrição
+- **Branch**: Uma linha temporal alternativa (como nos filmes de ficção científica)
+- **Fork**: Sua cópia pessoal do projeto onde você pode experimentar à vontade
+- **Pull Request**: "Ei, fiz melhorias aqui, que tal adicionar ao projeto principal?"
 
-## Como Usar
+📖 **Para aprender mais**: [Git in 15 minutes - Tutorial Interativo](https://try.github.io/)
 
-1.  **Clone o repositório:** Se você encontrou este script em um repositório Git, clone-o para sua máquina local:
+---
 
-    ```bash
-    git clone https://github.com/SerraRocketry/Projeto-Comum.git
-    cd Projeto-Comum
-    ```
+## 🔄 Seção 2: Fluxo de Trabalho Serra Rocketry - Do Fork ao Pull Request
 
-2.  **Torne o script executável:** Navegue até o diretório onde o arquivo `init_arduino.sh` está salvo e conceda permissão de execução:
+### Por que Fork + Pull Request?
+- **Segurança**: Você nunca quebra o código principal acidentalmente
+- **Currículo**: Todas suas contribuições aparecem no SEU perfil GitHub
+- **Revisão**: Alguém sempre revisa antes de integrar (4 olhos > 2 olhos)
+- **Aprendizado**: Você aprende vendo o código dos outros e recebendo feedback
 
-    ```bash
-    chmod +x init_arduino.sh
-    ```
+### Passo a Passo Ilustrado
 
-3.  **Execute o script:**
+#### 1️⃣ **Fork - Crie sua cópia**
+- Vá no repositório do Serra Rocketry
+- Clique em "Fork" (canto superior direito)
+- Agora você tem uma cópia no SEU GitHub: `github.com/SEU-USUARIO/nome-do-projeto`
 
-    * **Para criar um projeto com o nome padrão ("Novo-Projeto"):**
+#### 2️⃣ **Clone - Baixe para seu computador**
+```bash
+git clone https://github.com/SEU-USUARIO/nome-do-projeto.git
+cd nome-do-projeto
+```
 
-        ```bash
-        ./init_arduino.sh
-        ```
+#### 3️⃣ **Branch - Crie sua linha temporal**
+```bash
+git checkout -b feature/sensor-temperatura
+# Nomeie com: feature/descricao ou fix/descricao
+```
 
-    * **Para criar um projeto com um nome específico (substitua `MeuProjeto` pelo nome desejado):**
+#### 4️⃣ **Trabalhe e Commite**
+```bash
+# Após fazer mudanças
+git add .
+git commit -m "Adiciona leitura do sensor DS18B20"
+# Mensagem clara e em português
+```
 
-        ```bash
-        ./init_arduino.sh MeuProjeto
-        ```
+#### 5️⃣ **Push - Envie para SEU GitHub**
+```bash
+git push origin feature/sensor-temperatura
+```
 
-4.  **Verifique a estrutura:** Após a execução bem-sucedida, um novo diretório com o nome do seu projeto será criado no diretório atual, contendo a estrutura de pastas e arquivos definidos no script.
+#### 6️⃣ **Pull Request - Proponha a mudança**
+- GitHub mostrará um botão verde "Compare & Pull Request"
+- Descreva O QUE você fez e POR QUE
+- Marque alguém para revisar (@usuario)
 
-## Benefícios de Usar Este Script
+### Exemplo de Boa Descrição de PR
+```markdown
+## O que foi feito
+- Implementei leitura do sensor de temperatura DS18B20
+- Adicionei filtro de média móvel para reduzir ruído
 
-* **Organização:** Promove uma estrutura de diretórios clara e consistente para seus projetos Arduino desde o início.
-* **Eficiência:** Economiza tempo ao automatizar a criação de pastas e arquivos essenciais.
-* **Melhor Colaboração:** Facilita a compreensão da estrutura do projeto por outros colaboradores.
-* **Boas Práticas:** Incentiva a separação de código, documentação, arquivos de hardware e ferramentas auxiliares.
-* **Pronto para Git:** Inclui um arquivo `.gitignore` básico para ajudar a gerenciar seu repositório Git.
+## Por que é necessário
+Para a telemetria do foguete precisamos monitorar temperatura
+da câmara de combustível em tempo real
 
-## Editando o `.bashrc`
-Para facilitar o uso do script, você pode criar um alias no arquivo de configuração do seu shell (`.bashrc`, `.zshrc`, etc.). Isso permitirá que você execute o script de qualquer lugar usando um comando curto.
+## Como testar
+1. Conecte o DS18B20 no pino D4
+2. Execute o código
+3. Verifique leitura no Serial Monitor
+```
 
-1. **Abra o arquivo de configuração do seu shell**:
-    * Para Bash:
-      ```bash
-      nano ~/.bashrc
-      ```
-    * Para Zsh:
-      ```bash
-      nano ~/.zshrc
-      ```
+### ⚠️ Regra de Ouro
+**NUNCA** faça commit direto na `main` do repositório principal. Sempre use o fluxo Fork → PR.
 
-2. **Adicione o alias**:
-    Insira a seguinte linha no final do arquivo, substituindo `/caminho/para/init_arduino.sh` pelo caminho completo do script:
+📖 **Para aprender mais**: 
+- [GitHub Flow - Guia Visual](https://guides.github.com/introduction/flow/)
+- [Primeiro Pull Request - Tutorial](https://www.firsttimersonly.com/)
 
-    ```bash
-    alias initarduino='/caminho/para/init_arduino.sh'
-    ```
+---
 
-3. **Atualize as configurações do shell**:
-    Após salvar o arquivo, recarregue as configurações do shell:
+## 🌳 Seção 3: Branches - Organizando as Competições
 
-    * Para Bash:
-      ```bash
-      source ~/.bashrc
-      ```
-    * Para Zsh:
-      ```bash
-      source ~/.zshrc
-      ```
+### Estrutura de Branches Padrão
 
-4. **Use o alias**:
-    Agora você pode executar o script de qualquer lugar usando o comando:
+```
+main
+├── develop (desenvolvimento contínuo)
+├── comp-2025 (configuração específica para competição 2025)
+├── comp-2026 (configuração específica para competição 2026)
+└── feature/nome-da-feature (funcionalidades em desenvolvimento)
+```
 
-    ```bash
-    initarduino
-    ```
+### Quando usar cada Branch
 
-Isso simplifica o uso do script, eliminando a necessidade de navegar até o diretório onde ele está localizado.
+#### `main`
+- Código estável e testado
+- Versão que foi ou será usada em lançamento real
+- **Protegida**: só recebe código via PR aprovado
 
-## Contribuições
+#### `develop`
+- Integração de novas funcionalidades
+- Testes em bancada
+- Preparação para próxima versão estável
 
-Sinta-se à vontade para contribuir com melhorias no script, como adicionar mais arquivos padrão, personalizar o conteúdo dos arquivos iniciais ou adicionar opções de configuração. Pull requests são bem-vindos!
+#### `comp-YYYY`
+- Configurações específicas de cada competição
+- Regulamentos mudam? Branch nova!
+- Preserva exatamente o que foi usado em cada ano
+```bash
+# Criar branch de competição
+git checkout -b comp-2025
+# Fazer ajustes específicos para regulamento 2025
+```
 
-## Autor
+#### `feature/*` ou `fix/*`
+- Sempre criadas a partir de `develop`
+- Uma funcionalidade por branch
+- Nome descritivo: `feature/telemetria-lora`, `fix/vazamento-memoria`
 
-Este script foi criado para simplificar o início de projetos Arduino da Equipe de Foguetemodelismo Serra Rocketry do IPRJ-UERJ e promover boas práticas de organização. Sinta-se à vontade para usá-lo e adaptá-lo às suas necessidades.
+### Exemplo Prático
+```bash
+# Preparando para competição 2025
+git checkout develop
+git checkout -b comp-2025
+
+# Ajusta parâmetros para regulamento
+# - Apogeu máximo: 3000m
+# - Peso máximo: 5kg
+# - Frequência telemetria: 915MHz
+
+git commit -m "Ajusta parâmetros para regulamento COBRUF 2025"
+```
+
+### 📝 Importante
+Cada branch de competição deve ter um `README-COMP.md` documentando:
+- Regulamento específico daquele ano
+- Configurações alteradas
+- Resultados obtidos
+
+📖 **Para aprender mais**: [Git Branching - Tutorial Interativo](https://learngitbranching.js.org/?locale=pt_BR)
+
+---
+
+## 📁 Seção 4: Organização de Repositórios
+
+### Tipos de Repositório e Estrutura
+
+#### Repositórios de Sistema Completo (Computador de Bordo, Satélite)
+```
+nome-do-projeto/
+├── docs/                     # Documentação e diagramas
+│   ├── hardware/            # Esquemáticos, PCB
+│   ├── datasheets/          # PDFs dos componentes
+│   └── images/              # Fotos e diagramas
+├── firmware/                 # Código do microcontrolador
+│   └── firmware.ino
+├── software/                 # Interface, telemetria (se houver)
+│   ├── ground-station/      # Software da base
+│   └── data-analysis/       # Scripts de análise
+├── hardware/                 # Arquivos de CAD, PCB
+│   ├── pcb/                # Arquivos KiCAD/Eagle
+│   └── 3d-models/          # STL para impressão
+├── lib/                     # Bibliotecas customizadas
+├── test/                    # Testes e validação
+├── .gitignore
+└── README.md
+```
+
+#### Repositórios de Código Puro (Analysis, Simulações)
+```
+nome-do-projeto/
+├── src/                     # Código fonte
+├── data/                    # Dados de entrada/exemplo
+├── results/                 # Resultados das análises
+├── notebooks/               # Jupyter notebooks (se Python)
+├── requirements.txt         # Dependências Python
+├── .gitignore
+└── README.md
+```
+
+### O que NÃO versionar (.gitignore)
+```gitignore
+# Builds e compilados
+*.hex
+*.bin
+.build/
+
+# Arquivos pessoais do IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Dados grandes
+*.csv
+*.log
+results/raw_data/
+
+# Segredos
+config.h
+credentials.py
+.env
+
+# Mas SEMPRE inclua
+# config.example.h
+# credentials.example.py
+```
+
+### Arquivos Obrigatórios
+
+#### README.md - Template Mínimo
+```markdown
+# Nome do Projeto
+
+## O que é
+Breve descrição (2-3 linhas)
+
+## Como usar
+1. Passo 1
+2. Passo 2
+3. Passo 3
+
+## Hardware Necessário
+- Lista de componentes
+- Pinagem
+
+## Dependências
+- Biblioteca X
+- Ferramenta Y
+
+## Autores
+- @usuario1 - Subsistema X
+- @usuario2 - Subsistema Y
+```
+
+---
+
+## 📝 Seção 5: Documentação Mínima Obrigatória
+
+### Em Todo Commit
+```bash
+# ❌ RUIM
+git commit -m "ajustes"
+git commit -m "correções"
+
+# ✅ BOM
+git commit -m "Corrige leitura do MPU6050 em alta frequência"
+git commit -m "Adiciona filtro Kalman para estimativa de altitude"
+```
+
+### Em Todo Código
+```cpp
+// ❌ RUIM
+int x = analogRead(A0) * 0.48828;
+
+// ✅ BOM
+// Conversão ADC para temperatura (10mV/°C, ADC 10-bit, Vref=5V)
+const float ADC_TO_TEMP = (5.0 / 1024.0) * 100; 
+int temperatura_celsius = analogRead(SENSOR_TEMP_PIN) * ADC_TO_TEMP;
+```
+
+### Em Todo PR
+- **O quê**: Lista de mudanças
+- **Por quê**: Motivação/problema resolvido
+- **Como testar**: Passos para validar
+- **Breaking changes**: Algo que pode quebrar código existente?
+
+### Documentação de Hardware
+Para cada PCB/montagem, inclua:
+- Foto ou diagrama da montagem
+- Lista de componentes (BOM)
+- Pinagem utilizada
+- Tensões de operação
+
+---
+
+## ⚡ Seção 6: Dicas Rápidas para Produtividade
+
+### Comandos Git Mais Usados
+```bash
+# Ver status do que mudou
+git status
+
+# Ver histórico bonito
+git log --oneline --graph
+
+# Desfazer último commit (mantém mudanças)
+git reset HEAD~1
+
+# Atualizar seu fork com o original
+git remote add upstream https://github.com/Serra-Rocketry/nome-projeto.git
+git fetch upstream
+git merge upstream/main
+
+# Salvar trabalho temporariamente
+git stash
+# Recuperar trabalho salvo
+git stash pop
+```
+
+### Aliases Úteis (.bashrc)
+```bash
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --graph'
+```
+
+### VS Code - Extensões Essenciais
+- **GitLens**: Vê quem mudou cada linha
+- **Git Graph**: Visualiza branches
+- **Arduino/PlatformIO**: Para desenvolvimento embedded
+
+---
+
+## 🎯 Seção 7: Checklist de Contribuição
+
+Antes de fazer um PR, verifique:
+
+- [ ] Código compila sem warnings
+- [ ] Testei em hardware real (ou simulador)
+- [ ] Adicionei comentários em partes complexas
+- [ ] Atualizei README se necessário
+- [ ] Commit messages são descritivas
+- [ ] Não tem segredos/senhas no código
+- [ ] Pedi revisão de pelo menos 1 pessoa
+
+---
+
+## 🚨 Seção 8: Quando Pedir Ajuda
+
+### Está com problema? 
+1. **Leia a mensagem de erro** (sim, toda ela)
+2. **Google o erro** (alguém já passou por isso)
+3. **Pergunte no grupo** com:
+   - O que você tentou fazer
+   - Mensagem de erro completa
+   - Trecho de código relevante
+   - O que já tentou resolver
+
+### Canais de Comunicação
+- Issues do GitHub: Para bugs e melhorias
+- WhatsApp/Discord: Para dúvidas rápidas
+- Reuniões: Para decisões de arquitetura
+
+---
+
+## 📚 Recursos para Aprender Mais
+
+### Git e GitHub
+- 🎮 [Learn Git Branching](https://learngitbranching.js.org/?locale=pt_BR) - Jogo interativo
+- 📺 [Git e GitHub para Iniciantes](https://www.youtube.com/watch?v=8mei6uVttho) - Curso Grátis
+- 📖 [Pro Git Book](https://git-scm.com/book/pt-br/v2) - Livro completo em PT-BR
+
+### Boas Práticas de Código
+- [Clean Code - Resumo](https://github.com/ryanmcdermott/clean-code-javascript) - Princípios aplicáveis a qualquer linguagem
+
+### Específico para Embedded
+- [PlatformIO](https://platformio.org/) - Alternativa profissional ao Arduino IDE
+- [Awesome Embedded](https://github.com/nhivp/Awesome-Embedded) - Lista curada de recursos
+
+---
+
+## 🤝 Contribuindo com Este Documento
+
+Este documento é vivo! Encontrou algo confuso? Tem uma dica melhor? 
+1. Faça um fork deste repositório
+2. Edite o arquivo `BOAS_PRATICAS.md`
+3. Faça um PR com suas melhorias
+
+---
+
+**Mantido por**: Equipe Serra Rocketry - IPRJ/UERJ
