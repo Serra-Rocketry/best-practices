@@ -81,9 +81,9 @@ Use bibliotecas mantidas pela comunidade:
 ---
 
 ### ⚙️ [Boas Práticas de Hardware](./boas-praticas-hardware.md)
-**Fungibilidade, Padronização e Intercambiabilidade**
+**Fungibilidade, Padronização e Resiliência para Ambientes Hostis**
 
-Hardware deve ser projetado para ser **facilmente substituível e intercambiável**:
+Hardware deve ser projetado para ser **facilmente substituível e intercambiável**, mas também **robusto e resiliente** para suportar condições extremas:
 
 #### 🔄 **Fungibilidade**
 Partes devem ser trocáveis sem redesenhar o sistema:
@@ -98,12 +98,21 @@ Adote padrões de mercado:
 - Protocolos: I2C, SPI, UART (evite interfaces proprietárias)
 - Form-factors: PC104 para CubeSats, tamanhos comerciais de baterias
 
+#### 🚀 **Resiliência e Robustez**
+Hardware de foguete enfrenta condições extremas:
+- **Vibração**: 10-30G durante lançamento, teste com furadeira/subwoofer
+- **Soldas**: Inspeção rigorosa, soldas brilhantes e côncavas (soldas frias = falha)
+- **Fixação**: Tudo parafusado ou com hot glue, nada solto
+- **Strain relief**: Cabos com alívio de tensão (hot glue/heat shrink na raiz)
+- **Testes**: Vibração, queda, temperatura ANTES do lançamento
+- **Proteção**: Conformal coating, cases rígidos, kit de reparo de campo
+
 #### 🛠️ **Redundância e Modularidade**
 - Módulos substituíveis (sensor board, power board, telemetry board)
 - Pontos de teste acessíveis
 - Documentação de pinagem e especificações elétricas
 
-**Resultado:** Menos tempo consertando, mais tempo inovando!
+**Resultado:** Hardware que sobrevive ao transporte E ao lançamento!
 
 ---
 
