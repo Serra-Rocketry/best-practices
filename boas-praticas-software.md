@@ -14,7 +14,10 @@
 4. [Fork vs Novo Repositório vs Monorepo](#fork-vs-novo-repositório-vs-monorepo)
 5. [Não Reinvente a Roda](#não-reinvente-a-roda)
 6. [Gestão de Releases](#gestão-de-releases)
-7. [Casos Reais da Serra Rocketry](#casos-reais-da-serra-rocketry)
+7. [Watchdog: Proteção Contra Travamentos](#watchdog-proteção-contra-travamentos)
+8. [Zen do Python: Filosofia de Código Limpo](#zen-do-python-filosofia-de-código-limpo)
+9. [Abstração e Orientação a Objetos](#abstração-e-orientação-a-objetos)
+10. [Casos Reais da Serra Rocketry](#casos-reais-da-serra-rocketry)
 
 ---
 
@@ -682,6 +685,859 @@ Nenhum - totalmente compatível com v1.0.x
 - @maria-santos - Web interface
 - @pedro-costa - Testes em campo
 ```
+
+---
+
+## Watchdog: Proteção Contra Travamentos
+
+### 🐕 O que é um Watchdog?
+
+Um **watchdog** (cão de guarda) é um mecanismo de segurança que **reinicia o sistema** se ele travar ou parar de responder.
+
+**Analogia:** Como um cachorro que late se você não der sinal de vida a cada X minutos.
+
+---
+
+### Por que é Crítico em Foguetes?
+
+Durante o voo, você **NÃO tem acesso físico** ao sistema:
+- ❌ Não pode apertar o botão de reset
+- ❌ Não pode desligar e religar
+- ❌ Não pode conectar debugger
+
+**Se o sistema travar = missão perdida**
+
+---
+
+### Como Funciona?
+
+```cpp
+┌──────────────────────────────────────┐
+│  1. Sistema inicia                   │
+│  2. Watchdog configurado (ex: 5s)    │
+│  3. Loop principal:                  │
+│     - Faz trabalho útil              │
+│     - "Pet the dog" (reseta timer)   │
+│     - Repete                         │
+│                                      │
+│  Se NÃO resetar em 5s:               │
+│  → Watchdog REINICIA sistema         │
+└──────────────────────────────────────┘
+```
+
+---
+
+### Implementação ESP32
+
+```cpp
+#include <esp_task_wdt.h>
+
+#define WDT_TIMEOUT 5  // 5 segundos
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Configura watchdog de 5 segundos
+    esp_task_wdt_init(WDT_TIMEOUT, true);
+    esp_task_wdt_add(NULL);  // Adiciona task atual
+    
+    Serial.println("Watchdog ativo!");
+}
+
+void loop() {
+    // ============ TRABALHO ÚTIL ============
+    float altitude = readBarometer();
+    float accel = readIMU();
+    transmitTelemetry(altitude, accel);
+    
+    // ============ "PET THE DOG" ============
+    esp_task_wdt_reset();  // ← Reseta timer do watchdog
+    
+    delay(100);  // 100ms < 5s (seguro)
+}
+```
+
+**Se o código travar** (ex: loop infinito, deadlock):
+1. Watchdog não é resetado
+2. Após 5s, ESP32 reinicia automaticamente
+3. Sistema volta a funcionar
+
+---
+
+### Arduino (AVR)
+
+```cpp
+#include <avr/wdt.h>
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Ativa watchdog de 4 segundos
+    wdt_enable(WDTO_4S);
+    
+    Serial.println("Watchdog ativo!");
+}
+
+void loop() {
+    // Trabalho útil
+    readSensors();
+    logData();
+    
+    // Reseta watchdog
+    wdt_reset();
+    
+    delay(100);
+}
+```
+
+---
+
+### ⚠️ Cuidados Importantes
+
+#### 1. Timeout apropriado
+
+```cpp
+// ❌ Timeout muito curto
+#define WDT_TIMEOUT 0.5  // 500ms
+// Problema: operações lentas (SD card write) excedem timeout
+
+// ✅ Timeout apropriado
+#define WDT_TIMEOUT 5  // 5s
+// Detecta travamentos reais, mas permite operações legítimas
+```
+
+#### 2. Reset em TODAS as trajetórias de código
+
+```cpp
+// ❌ ERRADO
+void loop() {
+    if (condition) {
+        doWork();
+        wdt_reset();  // ← Só reseta se condition = true
+    }
+    // Se condition sempre false, watchdog NÃO é resetado!
+}
+
+// ✅ CORRETO
+void loop() {
+    if (condition) {
+        doWork();
+    }
+    
+    wdt_reset();  // ← Sempre executado
+}
+```
+
+#### 3. Operações bloqueantes
+
+```cpp
+// ❌ Operação pode exceder timeout
+void loop() {
+    String data = Serial.readStringUntil('\n');  // Pode bloquear!
+    wdt_reset();
+}
+
+// ✅ Timeout ou reset dentro do bloqueio
+void loop() {
+    if (Serial.available()) {
+        String data = Serial.readStringUntil('\n');
+    }
+    wdt_reset();
+}
+```
+
+---
+
+### Recuperação Após Reset
+
+**Detecte que houve reset do watchdog:**
+
+```cpp
+#include <esp_system.h>
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Verifica causa do último reset
+    esp_reset_reason_t reason = esp_reset_reason();
+    
+    if (reason == ESP_RST_TASK_WDT || reason == ESP_RST_WDT) {
+        Serial.println("⚠️ ATENÇÃO: Reset por watchdog!");
+        // Salva flag em EEPROM/flash
+        // Telemetria pode indicar problema
+    }
+    
+    // Inicializa watchdog
+    esp_task_wdt_init(WDT_TIMEOUT, true);
+    esp_task_wdt_add(NULL);
+}
+```
+
+**Telemetria com contador de resets:**
+
+```cpp
+uint8_t resetCount = 0;  // Salvar em EEPROM
+
+void setup() {
+    if (wasWatchdogReset()) {
+        resetCount++;
+        saveToEEPROM(resetCount);
+    }
+}
+
+void sendTelemetry() {
+    // Pacote inclui resetCount
+    // Se resetCount > 0 durante voo = problema!
+}
+```
+
+---
+
+### Quando NÃO Usar Watchdog?
+
+- ❌ Durante desenvolvimento/debug (dificulta debugging)
+- ❌ Com sleep modes (pode resetar durante sleep)
+
+**Solução:** Habilitar apenas em **modo de produção**
+
+```cpp
+#ifdef PRODUCTION_MODE
+    esp_task_wdt_init(WDT_TIMEOUT, true);
+#endif
+```
+
+---
+
+## Zen do Python: Filosofia de Código Limpo
+
+### 🧘 O Zen do Python
+
+Execute no Python:
+```python
+import this
+```
+
+**Resultado:**
+```
+The Zen of Python, by Tim Peters
+
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren't special enough to break the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+There should be one-- and preferably only one --obvious way to do it.
+Although that way may not be obvious at first unless you're Dutch.
+Now is better than never.
+Although never is often better than *right* now.
+If the implementation is hard to explain, it's a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea -- let's do more of those!
+```
+
+---
+
+### 💡 Aplicando ao Foguetemodelismo
+
+Vamos traduzir os princípios mais importantes para nosso contexto:
+
+#### 1. **"Simple is better than complex"**
+
+```python
+# ❌ COMPLEXO (difícil de entender)
+def calc(d):
+    return ((d[0]-d[1])**2+(d[2]-d[3])**2)**0.5 if len(d)==4 else None
+
+# ✅ SIMPLES (claro e direto)
+def calculate_distance_2d(x1, y1, x2, y2):
+    """Calcula distância euclidiana entre dois pontos 2D."""
+    dx = x2 - x1
+    dy = y2 - y1
+    return math.sqrt(dx**2 + dy**2)
+```
+
+**Aplicação:** Código do foguete deve ser entendido rapidamente, mesmo às 3h da manhã antes do lançamento!
+
+---
+
+#### 2. **"Explicit is better than implicit"**
+
+```python
+# ❌ IMPLÍCITO (o que é 9.81?)
+def calculate_altitude(pressure):
+    return 44330 * (1 - (pressure / 101325) ** 0.1903)
+
+# ✅ EXPLÍCITO (constantes nomeadas)
+GRAVITY = 9.81  # m/s²
+SEA_LEVEL_PRESSURE = 101325  # Pa
+PRESSURE_EXPONENT = 0.1903
+
+def calculate_altitude_from_pressure(pressure_pa):
+    """
+    Calcula altitude baseado na pressão atmosférica.
+    
+    Args:
+        pressure_pa: Pressão em Pascals
+    
+    Returns:
+        Altitude em metros acima do nível do mar
+    """
+    pressure_ratio = pressure_pa / SEA_LEVEL_PRESSURE
+    return 44330 * (1 - pressure_ratio ** PRESSURE_EXPONENT)
+```
+
+---
+
+#### 3. **"Readability counts"**
+
+```python
+# ❌ DIFÍCIL DE LER
+a=[(x,y,z) for x,y,z in data if x>0 and z<100]
+b=[math.sqrt(x**2+y**2+z**2) for x,y,z in a]
+
+# ✅ LEGÍVEL
+valid_accelerations = [
+    (x, y, z) 
+    for x, y, z in acceleration_data 
+    if x > 0 and z < 100
+]
+
+magnitudes = [
+    math.sqrt(x**2 + y**2 + z**2) 
+    for x, y, z in valid_accelerations
+]
+```
+
+**Dica:** Se precisa comentar linha por linha, o código não está claro o suficiente.
+
+---
+
+#### 4. **"Errors should never pass silently"**
+
+```python
+# ❌ ERRO SILENCIOSO
+def read_sensor():
+    try:
+        return sensor.read()
+    except:
+        return 0  # ← Problema mascarado!
+
+# ✅ ERRO TRATADO EXPLICITAMENTE
+def read_sensor():
+    """Lê sensor com tratamento de erro."""
+    try:
+        value = sensor.read()
+        return value
+    except SensorDisconnectedError as e:
+        logger.error(f"Sensor desconectado: {e}")
+        raise  # Propaga erro
+    except SensorTimeoutError:
+        logger.warning("Timeout no sensor, tentando novamente...")
+        time.sleep(0.1)
+        return sensor.read()  # Retry
+```
+
+**Aplicação:** Durante o voo, você PRECISA saber de erros! Log é crucial.
+
+---
+
+#### 5. **"If the implementation is hard to explain, it's a bad idea"**
+
+```python
+# ❌ DIFÍCIL DE EXPLICAR
+def f(d):
+    return sum([(d[i]-d[i-1])**2 for i in range(1,len(d))])**0.5
+
+# Você consegue explicar o que isso faz em 10 segundos?
+
+# ✅ FÁCIL DE EXPLICAR
+def calculate_path_length(positions):
+    """
+    Calcula comprimento total do caminho percorrido.
+    
+    Soma das distâncias entre pontos consecutivos.
+    """
+    distances = []
+    for i in range(1, len(positions)):
+        previous = positions[i - 1]
+        current = positions[i]
+        distance = abs(current - previous)
+        distances.append(distance)
+    
+    return sum(distances)
+```
+
+**Se você não consegue explicar facilmente = redesenhe!**
+
+---
+
+### 🎯 Resumo: Zen na Prática
+
+| Princípio | Aplicação em Foguetes |
+|-----------|----------------------|
+| **Simples > Complexo** | Código deve funcionar sob pressão |
+| **Explícito > Implícito** | Constantes físicas nomeadas |
+| **Legibilidade** | Equipe deve entender rapidamente |
+| **Erros visíveis** | Log de erros = debug pós-voo |
+| **Fácil de explicar** | Revisão de código eficiente |
+
+---
+
+## Abstração e Orientação a Objetos
+
+### 🎭 O Problema: Complexidade Crescente
+
+**Cenário:** Sistema de telemetria do foguete
+
+```python
+# ❌ SEM ABSTRAÇÃO: Código cresce descontroladamente
+import serial
+import struct
+import time
+
+# Configuração do rádio LoRa
+ser = serial.Serial('/dev/ttyUSB0', 9600)
+
+# Enviar pacote
+def send_data(altitude, accel_x, accel_y, accel_z):
+    # Monta pacote manualmente
+    packet = struct.pack('ffff', altitude, accel_x, accel_y, accel_z)
+    crc = calculate_crc(packet)
+    packet += struct.pack('H', crc)
+    
+    # Envia
+    ser.write(b'\xAA\xBB')  # Header
+    ser.write(packet)
+    ser.write(b'\xCC\xDD')  # Footer
+    time.sleep(0.01)
+
+# Agora precisa adicionar GPS...
+def send_data_with_gps(altitude, accel_x, accel_y, accel_z, lat, lon):
+    # Copia e modifica tudo... 😰
+    packet = struct.pack('ffffff', altitude, accel_x, accel_y, accel_z, lat, lon)
+    # ... mais código duplicado
+```
+
+**Problemas:**
+- Código duplicado
+- Difícil de adicionar sensores
+- Difícil de mudar protocolo
+- Difícil de testar
+
+---
+
+### ✅ Solução: Orientação a Objetos
+
+**OO não é sobre sintaxe - é sobre ORGANIZAÇÃO e ABSTRAÇÃO**
+
+---
+
+### 🎯 Para Que Serve Orientação a Objetos?
+
+#### 1. **Esconder Complexidade** (Encapsulamento)
+
+```python
+# ✅ COM OO: Complexidade escondida
+class LoRaRadio:
+    """Abstração do rádio LoRa."""
+    
+    def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
+        self._serial = serial.Serial(port, baudrate)
+        self._packet_id = 0
+    
+    def send_telemetry(self, data_dict):
+        """
+        Envia telemetria (você não precisa saber COMO).
+        
+        Args:
+            data_dict: Dicionário com dados (ex: {'altitude': 1200})
+        """
+        packet = self._build_packet(data_dict)
+        packet = self._add_crc(packet)
+        self._transmit(packet)
+        self._packet_id += 1
+    
+    def _build_packet(self, data_dict):
+        """Monta pacote (privado, usuário não vê)."""
+        # Complexidade escondida aqui
+        pass
+    
+    def _add_crc(self, packet):
+        """Adiciona CRC (privado)."""
+        # Complexidade escondida aqui
+        pass
+    
+    def _transmit(self, packet):
+        """Transmite (privado)."""
+        # Complexidade escondida aqui
+        pass
+
+# USO SIMPLES:
+radio = LoRaRadio()
+radio.send_telemetry({'altitude': 1200, 'accel_z': 15.3})
+```
+
+**Vantagem:** Usuário não precisa saber sobre struct.pack, CRC, headers, etc.
+
+---
+
+#### 2. **Trocar Implementações** (Polimorfismo)
+
+```python
+# Interface comum
+class Radio:
+    """Interface abstrata para rádios."""
+    
+    def send_telemetry(self, data_dict):
+        raise NotImplementedError
+
+class LoRaRadio(Radio):
+    """Implementação LoRa."""
+    def send_telemetry(self, data_dict):
+        # Implementação específica LoRa
+        pass
+
+class WiFiRadio(Radio):
+    """Implementação WiFi."""
+    def send_telemetry(self, data_dict):
+        # Implementação específica WiFi
+        pass
+
+# CÓDIGO QUE USA (não muda!):
+def flight_computer(radio: Radio):
+    """Computador de bordo funciona com QUALQUER rádio."""
+    while True:
+        altitude = read_barometer()
+        radio.send_telemetry({'altitude': altitude})
+        time.sleep(0.1)
+
+# Usa LoRa em campo
+flight_computer(LoRaRadio())
+
+# Usa WiFi em bancada
+flight_computer(WiFiRadio())
+```
+
+**Vantagem:** Mesmo código funciona com LoRa, WiFi, ou qualquer outro rádio!
+
+---
+
+#### 3. **Organizar Código Relacionado** (Coesão)
+
+```python
+# ❌ SEM OO: Funções espalhadas
+def read_mpu6050(): pass
+def calibrate_mpu6050(): pass
+def filter_mpu6050_data(): pass
+# ... 20 funções relacionadas a MPU6050 espalhadas
+
+# ✅ COM OO: Tudo relacionado junto
+class MPU6050:
+    """Sensor IMU MPU6050."""
+    
+    def __init__(self, i2c_address=0x68):
+        self.address = i2c_address
+        self._calibration = None
+    
+    def read(self):
+        """Lê aceleração e giroscópio."""
+        pass
+    
+    def calibrate(self):
+        """Calibra sensor."""
+        pass
+    
+    def _apply_filter(self, data):
+        """Filtro interno."""
+        pass
+
+# Tudo sobre MPU6050 está em UM lugar
+sensor = MPU6050()
+sensor.calibrate()
+data = sensor.read()
+```
+
+---
+
+#### 4. **Reutilizar Código** (Herança)
+
+```python
+# Classe base: sensor genérico
+class Sensor:
+    """Sensor genérico com funcionalidades comuns."""
+    
+    def __init__(self, name):
+        self.name = name
+        self._last_value = None
+        self._timestamp = None
+    
+    def log_reading(self, value):
+        """Salva leitura no log (comum a todos)."""
+        self._last_value = value
+        self._timestamp = time.time()
+        logger.info(f"{self.name}: {value}")
+    
+    def get_last_value(self):
+        """Retorna última leitura."""
+        return self._last_value
+    
+    def read(self):
+        """Método abstrato (cada sensor implementa)."""
+        raise NotImplementedError
+
+# Sensores específicos HERDAM funcionalidades comuns
+class Barometer(Sensor):
+    def __init__(self):
+        super().__init__("Barometer")
+        self._i2c = I2C(...)
+    
+    def read(self):
+        pressure = self._i2c.read_pressure()
+        self.log_reading(pressure)  # ← Herdado de Sensor
+        return pressure
+
+class IMU(Sensor):
+    def __init__(self):
+        super().__init__("IMU")
+        self._i2c = I2C(...)
+    
+    def read(self):
+        accel = self._i2c.read_accel()
+        self.log_reading(accel)  # ← Herdado de Sensor
+        return accel
+
+# USO:
+baro = Barometer()
+imu = IMU()
+
+baro.read()  # Automaticamente loga
+imu.read()   # Automaticamente loga
+
+# Última leitura disponível para ambos
+print(baro.get_last_value())
+print(imu.get_last_value())
+```
+
+**Vantagem:** Código de logging escrito UMA vez, usado por TODOS sensores.
+
+---
+
+### 🧠 Quando Usar OO vs Funções Simples?
+
+#### ✅ Use OO quando:
+
+1. **Há ESTADO persistente**
+   ```python
+   class FlightComputer:
+       def __init__(self):
+           self.state = "IDLE"  # ← Estado
+           self.apogee = None
+           self.launch_time = None
+   ```
+
+2. **Múltiplas operações relacionadas**
+   ```python
+   sensor = MPU6050()
+   sensor.calibrate()
+   sensor.start_sampling()
+   data = sensor.read()
+   sensor.stop_sampling()
+   ```
+
+3. **Diferentes implementações da mesma interface**
+   ```python
+   class Radio: pass
+   class LoRaRadio(Radio): pass
+   class WiFiRadio(Radio): pass
+   ```
+
+#### ❌ NÃO use OO quando:
+
+1. **Função simples sem estado**
+   ```python
+   # Não precisa de classe
+   def calculate_altitude(pressure):
+       return 44330 * (1 - (pressure / 101325) ** 0.1903)
+   ```
+
+2. **Apenas um lugar no código**
+   ```python
+   # Se usado apenas uma vez, função simples basta
+   def parse_gps_sentence(nmea_string):
+       # ...
+   ```
+
+---
+
+### 📚 Exemplo Completo: Sistema de Telemetria
+
+```python
+# ============ SENSOR (Abstração) ============
+class Sensor:
+    """Classe base para todos os sensores."""
+    
+    def read(self):
+        raise NotImplementedError
+    
+    def calibrate(self):
+        pass  # Opcional
+
+# ============ SENSORES ESPECÍFICOS ============
+class Barometer(Sensor):
+    def __init__(self):
+        self.bmp = BMP388()
+    
+    def read(self):
+        return {'pressure': self.bmp.read_pressure()}
+
+class IMU(Sensor):
+    def __init__(self):
+        self.mpu = MPU6050()
+    
+    def read(self):
+        return {
+            'accel_x': self.mpu.acceleration[0],
+            'accel_y': self.mpu.acceleration[1],
+            'accel_z': self.mpu.acceleration[2],
+        }
+
+# ============ RÁDIO (Abstração) ============
+class Radio:
+    def send(self, data):
+        raise NotImplementedError
+
+class LoRaRadio(Radio):
+    def __init__(self):
+        self.lora = RFM95W()
+    
+    def send(self, data):
+        packet = json.dumps(data)
+        self.lora.transmit(packet)
+
+# ============ COMPUTADOR DE BORDO ============
+class FlightComputer:
+    """
+    Computador de bordo - usa sensores e rádio de forma abstrata.
+    """
+    
+    def __init__(self, sensors, radio):
+        self.sensors = sensors  # Lista de sensores
+        self.radio = radio
+        self.running = False
+    
+    def start(self):
+        """Inicia missão."""
+        self.running = True
+        
+        # Calibra todos os sensores
+        for sensor in self.sensors:
+            sensor.calibrate()
+        
+        # Loop de telemetria
+        while self.running:
+            data = self._collect_data()
+            self.radio.send(data)
+            time.sleep(0.1)
+    
+    def _collect_data(self):
+        """Coleta dados de todos os sensores."""
+        telemetry = {'timestamp': time.time()}
+        
+        for sensor in self.sensors:
+            sensor_data = sensor.read()
+            telemetry.update(sensor_data)
+        
+        return telemetry
+    
+    def stop(self):
+        """Para missão."""
+        self.running = False
+
+# ============ USO SIMPLES ============
+# Setup
+baro = Barometer()
+imu = IMU()
+radio = LoRaRadio()
+
+# Cria flight computer com sensores e rádio
+fc = FlightComputer(sensors=[baro, imu], radio=radio)
+
+# Inicia missão
+fc.start()
+```
+
+**Vantagens:**
+- ✅ Adicionar GPS? Crie classe `GPS(Sensor)` e adicione na lista
+- ✅ Trocar para WiFi? `radio = WiFiRadio()`
+- ✅ Testar sem hardware? `radio = MockRadio()`
+- ✅ Cada classe tem UMA responsabilidade clara
+
+---
+
+### 🎓 Para Que Serve OO? (Resumo Final)
+
+| Objetivo | Como OO Ajuda | Exemplo |
+|----------|---------------|---------|
+| **Esconder complexidade** | Encapsulamento | LoRaRadio esconde detalhes de protocolo |
+| **Código reutilizável** | Herança | `Sensor` base com funcionalidades comuns |
+| **Trocar implementações** | Polimorfismo | `Radio` funciona com LoRa ou WiFi |
+| **Organizar código** | Coesão | Tudo sobre MPU6050 em uma classe |
+| **Facilitar testes** | Injeção de dependências | `MockRadio` para testes |
+
+**OO não é obrigatório - mas quando bem usado, SIMPLIFICA código complexo.**
+
+---
+
+### 📖 Referências para Aprofundamento
+
+#### Orientação a Objetos - Conceitos
+
+1. **[Clean Code](https://www.amazon.com.br/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)** - Robert C. Martin
+   - Capítulos sobre classes e objetos
+   - Como escrever código orientado a objetos limpo
+
+2. **[Object-Oriented Programming in Python](https://realpython.com/python3-object-oriented-programming/)** - Real Python
+   - Tutorial completo e prático
+   - Exemplos claros
+
+3. **[Design Patterns](https://refactoring.guru/design-patterns)** - Refactoring Guru
+   - Padrões de design comuns
+   - Quando e como usar cada um
+   - Exemplos visuais
+
+#### Python - Boas Práticas
+
+4. **[The Hitchhiker's Guide to Python](https://docs.python-guide.org/)** - Kenneth Reitz
+   - Melhores práticas Python
+   - Estrutura de projetos
+   - Código limpo
+
+5. **[Fluent Python](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/)** - Luciano Ramalho
+   - Python idiomático
+   - Uso avançado de OO em Python
+
+#### Padrões de Projeto
+
+6. **[Design Patterns: Elements of Reusable Object-Oriented Software](https://en.wikipedia.org/wiki/Design_Patterns)** - Gang of Four
+   - Clássico sobre padrões de design
+   - Fundamentos de arquitetura OO
+
+#### Vídeos e Cursos
+
+7. **[Python OOP Tutorial - Corey Schafer](https://www.youtube.com/watch?v=ZDa-Z5JzLYM&list=PL-osiE80TeTsqhIuOqKhwlXsIBIdSeYtc)** (YouTube)
+   - Série completa sobre OOP em Python
+   - Explicações claras com exemplos práticos
+
+8. **[SOLID Principles](https://www.youtube.com/watch?v=pTB30aXS77U)** - Fireship (YouTube)
+   - 5 princípios fundamentais de OO
+   - Curto e direto (10 min)
 
 ---
 
