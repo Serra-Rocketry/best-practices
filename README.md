@@ -80,7 +80,7 @@ Use bibliotecas mantidas pela comunidade:
 
 ---
 
-### ⚙️ [Boas Práticas de Hardware](./boas-praticas-hardware.md)
+### ⚙️ [Boas Práticas de Hardware](./hardware/boas-praticas-hardware.md)
 **Fungibilidade, Padronização e Resiliência para Ambientes Hostis**
 
 Hardware deve ser projetado para ser **facilmente substituível e intercambiável**, mas também **robusto e resiliente** para suportar condições extremas:

@@ -2,7 +2,19 @@
 
 > Fungibilidade, Padronização e Intercambiabilidade para Projetos de Foguetemodelismo
 
-[← Voltar ao índice](./README.md)
+[← Voltar ao índice](../README.md)
+
+---
+
+## 📋 Checklists Rápidas (Para Uso no Campo)
+
+**Acesso rápido para o dia do lançamento:**
+
+- 🚀 **[Checklist Pré-Voo](./checklist-pre-voo.md)** - Verificação de 5 minutos antes do lançamento
+- 🧰 **[Kit de Campo](./kit-campo.md)** - O que levar para reparos de emergência
+- ✅ **[Checklist de Design](./checklist-design.md)** - Verificações antes de fabricar PCB
+
+> 💡 **Dica:** Imprima os checklists e leve para o campo!
 
 ---
 
