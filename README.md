@@ -53,7 +53,7 @@ Aprenda a organizar seus projetos de forma que qualquer pessoa consiga entender 
 
 ---
 
-### 💻 [Boas Práticas de Software](./boas-praticas-software.md)
+### 💻 [Boas Práticas de Software](./software/boas-praticas-software.md)
 **Modularidade, Reutilização e Filosofia Unix**
 
 Princípios fundamentais para desenvolvimento de software sustentável:

@@ -2,7 +2,20 @@
 
 > Modularidade, Reutilização e Filosofia Unix aplicadas a Projetos de Foguetemodelismo
 
-[← Voltar ao índice](./README.md)
+[← Voltar ao índice](../README.md)
+
+---
+
+## 📋 Guias Rápidos (Para Uso Diário)
+
+**Acesso rápido para consulta durante desenvolvimento:**
+
+- 🚀 **[Checklist Pré-Deploy](./checklist-pre-deploy.md)** - Verificações antes de gravar firmware
+- 🐕 **[Watchdog - Guia Rápido](./watchdog-guia-rapido.md)** - Template e implementação
+- 🧘 **[Zen do Python - Guia Rápido](./zen-python-guia-rapido.md)** - Princípios de código limpo
+- 🎯 **[Quando Usar OO](./quando-usar-oo.md)** - Guia de decisão: classes vs funções
+
+> 💡 **Dica:** Use os guias rápidos para consultas diárias, este arquivo para aprendizado!
 
 ---
 
