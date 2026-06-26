@@ -71,6 +71,59 @@ Cross-cutting or team-wide repos.
 - **Software vs mechanical** — if it involves writing code, it's likely Telemetria e Controle. If it's CAD, structural calculations, or using existing tools, it's Aerodinâmica e Estruturas.
 - **Test infrastructure vs test data** — repos like `thrust-stand` contain hardware/software for building equipment, NOT the test data itself. Raw test data (static, hydrostatic) lives in `solid-propulsion` or `liquid-propulsion`. Telemetry consumes that raw data for analysis.
 
+## Team members by domain
+
+| Domain | Member | GitHub | Notes |
+|--------|--------|--------|-------|
+| Propulsão | — | — | |
+| Telemetria e Controle | — | — | |
+| Aerodinâmica e Estruturas | — | — | |
+
+_Fill in when members create GitHub accounts. Keep this table as the source of truth for issue assignment._
+
+## Issue conventions
+
+Prefix issues with a category tag (used in `solid-propulsion` as the reference pattern):
+
+| Prefix | Meaning | Example |
+|--------|---------|---------|
+| `[Doc]` | Documentation | `[Doc] Definir fronteira motor vs analysis` |
+| `[Data]` | Data contribution, files, datasets | `[Data] Contribuir dados de teste estático definitivos` |
+| `[RTC]` | Technical review, compliance, migration | `[RTC] Revisão da migração do Drive para Git` |
+| `[Bug]` | Something is broken | `[Bug] Leitura incorreta do sensor BMP388` |
+| `[Feat]` | New feature or capability | `[Feat] Adicionar filtro Kalman` |
+| _(no prefix)_ | General task | `Esclarecer diferença do Propelente 2` |
+
+Labels: use GitHub default labels (`documentation`, `enhancement`, `bug`, `question`) in addition to title prefixes.
+
+## Creating issues with `gh`
+
+```bash
+# Create issue with prefix and assignee
+gh issue create --repo Serra-Rocketry/REPO \
+  --title "[Doc] Descrição curta" \
+  --body "Contexto, critérios de aceite, referências." \
+  --assignee github-username \
+  --label documentation
+
+# List open issues
+gh issue list --repo Serra-Rocketry/REPO
+
+# View issue details
+gh issue view NUMBER --repo Serra-Rocketry/REPO
+
+# Close an issue
+gh issue close NUMBER --repo Serra-Rocketry/REPO
+```
+
+### Golden rules for issue creation
+
+- **Who produces data creates data contribution issues** (e.g., `[Data]` in propulsion repos).
+- **Who consumes data creates analysis issues** (e.g., `[Doc]` in telemetry repos).
+- **Always confirm with a human before creating issues** — AI drafts the title, body, and assignee; human approves.
+- **Keep issues specific and actionable** — one clear deliverable per issue.
+- **Reference the issue in commits** — `Closes #123` or `Ref #123`.
+
 ## When editing
 
 - Keep guides practical and example-driven (that's the repo's style).
