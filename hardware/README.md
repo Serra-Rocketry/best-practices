@@ -14,6 +14,16 @@
   - Técnicas de proteção
   - Exemplos práticos
 
+### 🧩 [Design Mecânico e Impressão 3D](./boas-praticas-design-mecanico.md)
+**Quando usar:** projetando peça, carcaça ou mecanismo (CAD, simulação, impressão)
+
+- Escolha da ferramenta CAD (OpenSCAD vs CadQuery/build123d vs FreeCAD)
+- Montagem em 3 níveis: encaixe estático → simulador físico (PyBullet/MuJoCo) → assembly profissional
+- Análise de resistência (gmsh + CalculiX) e regras de impressão FDM
+- IA generativa no fluxo de design e versionamento de peças
+
+---
+
 ### ✅ Checklists (Uso Rápido)
 
 Arquivos otimizados para **impressão e uso no campo**:
@@ -130,6 +140,7 @@ Encontrou algo que falta nos checklists?
 | Arquivo | Linhas | Uso | Tempo Leitura |
 |---------|--------|-----|---------------|
 | boas-praticas-hardware.md | ~1500 | Referência | 30-40 min |
+| boas-praticas-design-mecanico.md | ~170 | Referência | 10-15 min |
 | checklist-pre-voo.md | ~200 | Campo | 5 min |
 | kit-campo.md | ~250 | Preparação | 10 min |
 | checklist-design.md | ~350 | Desenvolvimento | 15-20 min |
