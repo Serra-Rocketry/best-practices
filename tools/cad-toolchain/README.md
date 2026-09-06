@@ -27,7 +27,7 @@ Ambiente containerizado para design mecânico e impressão 3D da equipe: geraç�
 docker build -t serra/cad-toolchain .
 ```
 
-> No Oráculo (TrueNAS), rodar com `sudo docker build -t serra/cad-toolchain .`
+> No Oráculo (TrueNAS), rodar com `sudo docker build -t serra/cad-toolchain .` e usar o wrapper com `CAD_DOCKER="sudo docker"`
 
 ---
 

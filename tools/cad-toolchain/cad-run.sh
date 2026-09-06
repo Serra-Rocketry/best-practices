@@ -13,27 +13,41 @@
 #   ./cad-run.sh shell                        → bash interativo no container
 #
 # Variáveis:
-#   CAD_IMAGE   imagem a usar (padrão: serra/cad-toolchain:latest)
-#   CAD_UID_GID uid:gid override (padrão: $(id -u):$(id -g))
+#   CAD_IMAGE    imagem a usar (padrão: serra/cad-toolchain:latest)
+#   CAD_UID_GID  uid:gid override (padrão: $(id -u):$(id -g))
+#   CAD_DOCKER   comando docker (padrão: docker; no Oráculo: "sudo docker")
+#   CAD_XDISPLAY número do display Xvfb (padrão: 77)
 
 set -euo pipefail
 
 IMAGE="${CAD_IMAGE:-serra/cad-toolchain:latest}"
 UID_GID="${CAD_UID_GID:-$(id -u):$(id -g)}"
+DOCKER="${CAD_DOCKER:-docker}"
+XDISPLAY="${CAD_XDISPLAY:-77}"
 
 cmd="${1:-help}"
 shift || true
 
 docker_run() {
-    docker run --rm -v "$PWD":/work -w /work -u "$UID_GID" "$IMAGE" "$@"
+    $DOCKER run --rm -v "$PWD":/work -w /work -u "$UID_GID" "$IMAGE" "$@"
 }
 
 case "$cmd" in
     render)
         [ $# -ge 1 ] || { echo "uso: $0 render arquivo.scad"; exit 1; }
         f="$1"; out="${f%.scad}.png"
-        # Preview PNG exige contexto GL → xvfb-run (container headless)
-        docker_run xvfb-run -a openscad -o "$out" --viewall --autocenter --imgsize=1200,900 "$f"
+        # Preview PNG exige contexto GL; OpenSCAD headless não tem X → sobe
+        # Xvfb (tela 24-bit; xvfb-run trava com a 8-bit padrão) e renderiza.
+        # $0/$1 do sh -c = caminhos (out, f); aspas simples preservam o script.
+        docker_run sh -c '
+            Xvfb :'"$XDISPLAY"' -screen 0 1280x1024x24 >/dev/null 2>&1 &
+            XPID=$!
+            sleep 1
+            DISPLAY=:'"$XDISPLAY"' openscad -o "$0" --viewall --autocenter --imgsize=1200,900 "$1"
+            RC=$?
+            kill $XPID 2>/dev/null
+            exit $RC
+        ' "$out" "$f"
         echo "→ $out"
         ;;
     stl)
