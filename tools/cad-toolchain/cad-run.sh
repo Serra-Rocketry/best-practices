@@ -32,7 +32,8 @@ case "$cmd" in
     render)
         [ $# -ge 1 ] || { echo "uso: $0 render arquivo.scad"; exit 1; }
         f="$1"; out="${f%.scad}.png"
-        docker_run openscad -o "$out" --viewall --autocenter --imgsize=1200,900 "$f"
+        # Preview PNG exige contexto GL → xvfb-run (container headless)
+        docker_run xvfb-run -a openscad -o "$out" --viewall --autocenter --imgsize=1200,900 "$f"
         echo "→ $out"
         ;;
     stl)

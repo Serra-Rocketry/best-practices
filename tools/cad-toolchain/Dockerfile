@@ -14,6 +14,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Toolchain CAD/FEA + Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openscad \
+        xvfb \
         gmsh \
         calculix-ccx \
         python3 \
@@ -22,6 +23,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# OpenSCAD headless precisa de contexto GL p/ preview PNG → xvfb-run
+ENV HOME=/tmp
 
 # CadQuery/trimesh num venv isolado (evita conflito com python do sistema)
 RUN python3 -m venv /opt/venv \
