@@ -15,6 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openscad \
         xvfb \
+        xauth \
         gmsh \
         calculix-ccx \
         python3 \
