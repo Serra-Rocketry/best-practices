@@ -116,6 +116,20 @@ Hardware de foguete enfrenta condições extremas:
 
 ---
 
+### 🧰 [CAD Toolchain](./tools/cad-toolchain/README.md)
+**Ambiente containerizado para design mecânico e impressão 3D**
+
+Quando for gerar ou validar uma peça (com LLM ou não), use o toolchain da equipe — o mesmo ambiente roda em qualquer máquina:
+- **OpenSCAD**: compila `.scad` → STL/PNG (o código é o modelo)
+- **CadQuery**: STEP/B-Rep para reverse engineering de peça
+- **trimesh**: checagem de interferência e folga entre malhas
+- **gmsh + CalculiX**: análise de resistência (FEA) headless
+- Geração por **LLM fica fora do container** (API) — nada de chave na imagem
+
+**Resultado:** Peças versionadas como código (`.scad`), validadas antes de imprimir!
+
+---
+
 ## 🎯 Por Que Seguir Estas Práticas?
 
 ### Para Você (Aluno)
@@ -140,7 +154,8 @@ Hardware de foguete enfrenta condições extremas:
 1. **Novo na equipe?** Comece por [Git e GitHub](./boas-praticas-git-github.md)
 2. **Criando um projeto?** Veja [Organização](./boas-praticas-organizacao.md) e [Software](./boas-praticas-software.md)
 3. **Projetando hardware?** Leia [Hardware](./boas-praticas-hardware.md)
-4. **Contribuindo?** Siga o fluxo Fork → PR explicado em [Git e GitHub](./boas-praticas-git-github.md)
+4. **Gerando/validando peça 3D?** Veja [Design Mecânico e Impressão 3D](./hardware/boas-praticas-design-mecanico.md) e o [CAD Toolchain](./tools/cad-toolchain/README.md)
+5. **Contribuindo?** Siga o fluxo Fork → PR explicado em [Git e GitHub](./boas-praticas-git-github.md)
 
 ---
 
